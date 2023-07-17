@@ -20,7 +20,7 @@ int forceSleep = 0;
 
 // ThingSpeak settings
 char thingserver[] = "api.thingspeak.com";
-String writeAPIKey = "CYUR_API_WRITE_KEY";
+String writeAPIKey = "YOUR_API_WRITE_KEY";
 
 
 long timeOut;
