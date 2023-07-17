@@ -8,5 +8,6 @@ Before using you MUST install the modified version of FDRS library included in t
 
 Very useful information regarding FDRS library can be found here : https://github.com/timmbogner/Farm-Data-Relay-System
 
-![alt tag](https://user-images.githubusercontent.com/31324055/130593977-acc94515-f512-46ca-b4f2-8be1f4e9244f.png)
 
+
+![alt tag](https://user-images.githubusercontent.com/31324055/253881040-89694951-13c3-4acd-8fb7-904fe68d05fe.jpg)
