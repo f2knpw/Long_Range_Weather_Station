@@ -1,0 +1,92 @@
+% Read wind speed and direction from a ThingSpeak channel and visualize 
+% wind velocity using the MATLAB COMPASS plot function. 
+   
+% Channel 2209680 contains data from the Deyme Weather Station, located 
+% in France. The data is collected once every 10 minutes. Field 
+% 4 contains wind direction data and field 3 contains wind speed data. 
+   
+% Channel ID to read data from 
+readChannelID = 2209680; 
+% Wind Direction Field ID 
+WindDirFieldID = 4; 
+% Wind Speed Field ID 
+WindSpeedFieldID = 3; 
+   
+% Channel Read API Key   
+% If your channel is private, then enter the read API 
+% Key between the '' below:   
+readAPIKey = 'YOUR API READ KEY'; 
+   
+% Fetch wind direction for the last nbPoints from the weather 
+% station. Learn more about the THINGSPEAKREAD function by going to 
+% the Documentation tab on the right side pane of this page. 
+nbPoints = 1
+windDir = thingSpeakRead(readChannelID,'Fields',WindDirFieldID,'NumPoints',nbPoints,...
+'ReadKey',readAPIKey); 
+   
+% Fetch wind speed for the last nbPoints from the weather station 
+windSpeed = thingSpeakRead(readChannelID,'Fields',WindSpeedFieldID,...
+'NumPoints',nbPoints,'ReadKey',readAPIKey); 
+   
+% Convert to radians and change axis from heading (North and CCW) to polar(East and CW) and add the orientation of Deyme Airfield (72° from East)
+rad = (-windDir +90  )*2*pi/360; 
+   
+   
+% Calculate the x component 
+u = cos(rad) .*.81 %windSpeed;   
+u(nbPoints +1) = cos(rad(nbPoints)+pi) * .81 %windSpeed(nbPoints) % add the sock point
+   
+% Calculate the y component 
+v = sin(rad) .* .81 %windSpeed;   
+v(nbPoints +1) = sin(rad(nbPoints)+pi) *.81 %windSpeed(nbPoints)  % add the sock point
+
+% Generate a compass plot 
+tiledlayout(1,1)
+
+% Left plot
+ax1 = nexttile;
+
+c = compass(ax1,u,v,'-b')                   % return line handles
+
+
+%remove the arrows but the last one
+for i=1:numel(c)-1
+  c(i).XData(end-2:end)=nan;       % HG won't display NaN points (arrows)
+end
+mystring = "wind direction : "
+rounded = floor( windDir(nbPoints) + 0.5);
+mystring = mystring + string(rounded);
+title(ax1,mystring)
+c0 = c(nbPoints);                %sock point is wide and red
+c0.LineWidth = 4;
+c1 = c(nbPoints+1);                %sock point is wide and red
+c1.LineWidth = 4;
+
+if windSpeed(nbPoints) < 10
+    c0.Color = [12/255 237/255 61/255];   %green
+    c1.Color = [12/255 237/255 61/255];   %green
+elseif windSpeed(nbPoints) < 20
+    c0.Color = [247/255 207/255 2/255]; %orange
+    c1.Color = [247/255 207/255 2/255]; %orange
+else
+    c0.Color = 'r';
+    c1.Color = 'r';
+end
+
+% Using the code above
+% Removing the label
+set(findall(gcf, 'String', '30', '-or','String','60', '-or','String','120','-or','String','150') ,'String', '  ');
+% Altering the angular label
+set(findall(gcf, 'String', '90'),'String', ' N'); 
+set(findall(gcf, 'String', '0'),'String', '  E'); 
+set(findall(gcf, 'String', '180'),'String', 'W'); 
+set(findall(gcf, 'String', '270'),'String', 'S'); 
+% Removing the label
+set(findall(gcf, 'String', '210', '-or','String','240', '-or','String','300','-or','String','330') ,'String', '  ');
+% Altering the radial label
+set(findall(gcf, 'String', '  0.1', '-or','String','  0.2', '-or','String','  0.3', '-or','String','  0.4' , '-or','String','  0.6', '-or','String','  0.7', '-or','String','  0.8', '-or','String','  0.9'),'String', ''); 
+set(findall(gcf, 'String', '  0.25', '-or','String','  0.35', '-or','String','  0.45', '-or','String','  0.55' , '-or','String','  0.65', '-or','String','  0.75', '-or','String','  0.85', '-or','String','  0.95'),'String', ''); 
+set(findall(gcf, 'String', '  0.5', '-or','String','  1', '-or','String','  1.5', '-or','String','  2' , '-or','String','  3', '-or','String','  4'),'String', ''); 
+set(findall(gcf, 'String', '  5', '-or','String','  10', '-or','String','  15', '-or','String','  20' , '-or','String','  25', '-or','String','  30'),'String', ''); 
+set(findall(gcf, 'String', '  6', '-or','String','  7', '-or','String','  8', '-or','String','  9' , '-or','String','  11', '-or','String','  12'),'String', ''); 
+set(findall(gcf, 'String', '  13', '-or','String','  14', '-or','String','  16', '-or','String','  17' , '-or','String','  18', '-or','String','  19'),'String', ''); 
