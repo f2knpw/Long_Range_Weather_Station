@@ -1014,7 +1014,7 @@ float getAnemometer(void)
 {
   //float anemometerValue = ((float)tops ) ;
   //float anemometerValue = ((float)tops *60 * 1000.) / (millis() - anemometerMeasuringTime); //expressed in RPM
-  float anemometerValue = (((float)tops * 60 * 1000.) / (millis() - anemometerMeasuringTime)) * 0.0719; //expressed in km/h after calibration : https://hackaday.io/project/190577-rezodo-long-range-irrigation-and-weather-station/log/218476-calibration
+  float anemometerValue = (((float)tops * 60 * 1000.) / (millis() - anemometerMeasuringTime)) * 0.105; //expressed in km/h after calibration : https://hackaday.io/project/190577-rezodo-long-range-irrigation-and-weather-station/log/218476-calibration
   tops = 0;
   anemometerMeasuringTime = millis();
   return anemometerValue;
