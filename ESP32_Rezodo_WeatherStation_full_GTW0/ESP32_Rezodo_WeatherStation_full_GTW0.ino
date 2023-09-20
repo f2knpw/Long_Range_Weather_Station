@@ -309,7 +309,7 @@ void setup() {
     //if it does not connect it starts an access point with the specified name
     //here  "AutoConnectAP"
     //and goes into a blocking loop awaiting configuration
-    if (!wifiManager.startConfigPortal("JP Rezodo"))
+    if (!wifiManager.startConfigPortal("JP Weather Station"))
     {
       Serial.println("failed to connect and hit timeout");
       delay(3000);
@@ -327,10 +327,11 @@ void setup() {
     // strcpy(OWM_APIkey, custom_OWM_APIkey.getValue());
     strcpy(ascMargin, custom_ascMargin.getValue());
     timeToSleep = atoi(ascMargin);
+	if (timeToSleep < 2) timeToSleep = 2;									 
     preferences.putInt("timeToSleep", timeToSleep);                 // reset time to sleep to 10 minutes (usefull after night)
     Serial.print("time to sleep : ");
     Serial.println(timeToSleep);
-if (timeToSleep < 2) timeToSleep = 2;
+
     preferences.putString("password", WiFi.psk());
     preferences.putString("ssid", WiFi.SSID());
     delay(2000);
@@ -583,9 +584,11 @@ void loop() {
       TelnetStream.print( sensorValues[1][2][0]);
       TelnetStream.println(" hPa");
 
-      TelnetStream.print("rot speed = ");
+      TelnetStream.print("wind speed = ");
       TelnetStream.print(sensorValues[1][3][0]);
-      TelnetStream.print(" rpm   wind direction = ");
+      TelnetStream.print(" km/h   wind gusts = ");
+      TelnetStream.print( sensorValues[1][6][0]);	  
+	  TelnetStream.print(" km/h   wind direction = ");
       TelnetStream.println(sensorValues[1][4][0]);
 
       TelnetStream.print("rain weight = ");
@@ -667,10 +670,13 @@ void ThingSpeakPost(void)
       Serial.print( sensorValues[1][2][0]);
       Serial.println(" hPa");
 
-      Serial.print("rot speed = ");
+      Serial.print("wind speed = ");
       Serial.print(sensorValues[1][3][0]);
-      Serial.print(" km/h   wind direction = ");
+      Serial.print(" km/h   wind gusts = ");
+      Serial.print( sensorValues[1][6][0]);	  
+	  Serial.print(" km/h   wind direction = ");
       Serial.println(sensorValues[1][4][0]);
+
 
       Serial.print("rain weight = ");
       Serial.print(sensorValues[1][5][0]);
@@ -686,7 +692,7 @@ void ThingSpeakPost(void)
   {
     // Create data string to send to ThingSpeak.
     float scaledValue = mapf(sensorValues[2][0][0], 50, 370, 100, 0); //remap values from 100 to 0
-    String data =  "field1=" + String(sensorValues[1][0][0]) + "&field2=" + String(sensorValues[2][0][0]) + "&field3=" + String(scaledValue) + "&field4=" + String(sensorValues[1][1][0]) + "&field5=" + String(sensorValues[1][2][0]) + "&field6=" + String(sensorValues[1][3][0]) + "&field7=" + String(sensorValues[1][4][0]) + "&field8=" + String(sensorValues[1][5][0])  ; //shows how to include additional field data in http post
+    String data =  "field1=" + String(sensorValues[1][0][0]) + "&field2=" + String(sensorValues[2][0][0]) + "&field3=" + String(sensorValues[1][1][0]) + "&field4=" + String(sensorValues[1][2][0]) + "&field5=" + String(sensorValues[1][3][0]) + "&field6=" + String(sensorValues[1][4][0]) + "&field7=" + String(sensorValues[1][5][0] + "&field8=" + String(sensorValues[1][6][0])  ; //shows how to include additional field data in http post
 
     // POST data to ThingSpeak.
     if (client.connect(thingserver, 80)) {
@@ -710,9 +716,11 @@ void ThingSpeakPost(void)
       TelnetStream.print( sensorValues[1][2][0]);
       TelnetStream.println(" hPa");
 
-      TelnetStream.print("rot speed = ");
+      TelnetStream.print("wind speed = ");
       TelnetStream.print(sensorValues[1][3][0]);
-      TelnetStream.print(" km/h   wind direction = ");
+      TelnetStream.print(" km/h   wind gusts = ");
+      TelnetStream.print( sensorValues[1][6][0]);	  
+	  TelnetStream.print(" km/h   wind direction = ");
       TelnetStream.println(sensorValues[1][4][0]);
 
       TelnetStream.print("rain weight = ");
