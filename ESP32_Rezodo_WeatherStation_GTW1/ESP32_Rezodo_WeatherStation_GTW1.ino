@@ -29,6 +29,8 @@ float outsideTemperature = 0 ;
 float pressure = 0 ;
 float windAngle = 0;
 float windSpeed = 0;
+float windSpeedMax = 0;
+long windTimeOut = 0;     //used in loop to sample winsSpeedMax every 2s					   																		
 int smooth = 1000;        //acquire smooth*values for each ADC
 float Vin = 0.;           //input Voltage (solar panel voltage)
 int sensorsGetTime = 15000; //ms to acquire sensors in worst case
@@ -808,6 +810,12 @@ void setup() {
   sensorsGetTime = min(sensorsGetTime, 30000);
   Serial.print("time spent into setup : sensorsGetTime (ms) ");
   Serial.println(sensorsGetTime);
+  
+#ifdef HAS_ANEMOMETER
+  windSpeed = getAnemometer();
+  windSpeedMax = windSpeed;
+  windTimeOut = millis();
+#endif  
 }
 
 #ifdef HAS_HX711
@@ -916,9 +924,9 @@ void loop()
             dt.second = seconds;
             if (rtc.isHalted()) DBG("RTC is halted...");
             rtc.setDateTime(&dt);
-#ifdef HAS_ANEMOMETER
-            windSpeed = getAnemometer();
-#endif
+//#ifdef HAS_ANEMOMETER
+//            windSpeed = getAnemometer();
+//#endif
             sendSensorsValues();              //now answer with the sensors values
             break;
           default:
@@ -929,6 +937,17 @@ void loop()
     }
     myCtrl = 0;                                       //Ctrl message has been read, clear it
   }
+#ifdef HAS_ANEMOMETER
+  if (((millis() - windTimeOut) > 4000))   //compute windSpeedMax every 4s
+  {
+    windTimeOut = millis();
+    windSpeedMax = max(windSpeedMax, getAnemometer());
+    Serial.print(" rot speed (km/h): ");
+    Serial.print(windSpeed);
+    Serial.print(" max speed : ");
+    Serial.println(windSpeedMax);
+  }
+#endif					  
 
   if ((((millis() - telnetTimeOut) > 3000)) && hasWifiCredentials)  //debug with telnet (Termius on Android port 23)
   {
@@ -944,10 +963,10 @@ void loop()
     TelnetStream.println(" g");
 #endif
 #ifdef HAS_ANEMOMETER
-    TelnetStream.print("hall sensor: ");
-    TelnetStream.print(digitalRead(HALL_OUT_PIN));
-    TelnetStream.print(" rot speed (km/h): ");
-    TelnetStream.println(windSpeed);
+   TelnetStream.print(" wind speed (km/h): ");
+    TelnetStream.print(windSpeed);
+    TelnetStream.print(" max speed : ");
+    TelnetStream.println(windSpeedMax);
 #endif
 #ifdef HAS_AS5600
     TelnetStream.print("wind direction: ");
@@ -1039,6 +1058,10 @@ void sendSensorsValues(void)
   loadFDRS(windAngle, WINDHDG_T, id); //will send back these data readings using INTERNAL_ACT event. Id 0x104 = GTW1 sensor4
   id = (UNIT_MAC << 8) | 5;
   loadFDRS(rain / 10, RAINFALL_T, id); //will send back these data readings using INTERNAL_ACT event. Id 0x105 = GTW1 sensor5 //10g = 1mm of rain ==> needs to divide by 10 !
+ 
+  id = (UNIT_MAC << 8) | 6;
+  loadFDRS(windSpeedMax, WINDSPD_T, id); //will send back these data readings using INTERNAL_ACT event. Id 0x104 = GTW1 sensor4
+
   sendFDRS();
   forceSleep ++;
   if (forceSleep > 3) gotoSleep();  //escape from eternal lock...
