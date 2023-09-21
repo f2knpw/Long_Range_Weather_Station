@@ -9,8 +9,8 @@
 readChannelID = 2209680; 
 % Wind Direction Field ID 
 WindDirFieldID = 4; 
-% Wind Speed Field ID 
-WindSpeedFieldID = 3; 
+% Wind Gusts Field ID 
+WindSpeedFieldID = 5; 
    
 % Channel Read API Key   
 % If your channel is private, then enter the read API 
